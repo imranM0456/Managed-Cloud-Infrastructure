@@ -1,0 +1,19 @@
+check,severity,resource
+PE01,MEDIUM,pe-pend
+PE01,HIGH,pe-rej
+PE08,HIGH,pe-gone
+PE05,MEDIUM,pe-pe5m
+PE05,LOW,pe-pe5l
+PE05,MEDIUM,pe-kv
+PE02,HIGH,pe-kv
+PE03,HIGH,pe-pe03
+PE04,HIGH,pe-pe04
+PE09,MEDIUM,pe-pe09
+ZN05,HIGH,pe-zn05
+TG01,MEDIUM,stpedemo.*tg1m
+TG01,LOW,stpedemo.*tg1l
+RC01,LOW,orphan-rc01\.privatelink\.blob\.core\.windows\.net
+ZN01,HIGH,privatelink\.queue\.core\.windows\.net
+ZN02,MEDIUM,privatelink\.table\.core\.windows\.net
+ZN03,MEDIUM,privatelink\.autoreg\.demo\.test \(link .*\)
+NW01,INFO,pedemo-vnet-b
