@@ -1,17 +1,27 @@
 terraform {
   required_version = ">= 1.6"
   required_providers {
-    azurerm = { source = "hashicorp/azurerm", version = "~> 4.40.0" }
+    azurerm = { source = "hashicorp/azurerm", version = "~> 4.42.0" }
     random  = { source = "hashicorp/random", version = "~> 3.6" }
   }
 }
 
 provider "azurerm" {
-  subscription_id = var.subscription_id
+  subscription_id                 = "a3496361-d913-432d-98bd-98bd6cae7ed4"
+  resource_provider_registrations = "none"
+
   features {
-    key_vault { purge_soft_delete_on_destroy = true }
+    key_vault { 
+      purge_soft_delete_on_destroy = true 
+    }
+    
+    # Fix: Changed from 'storage_account' to 'storage'
+    storage {
+      data_plane_available = false
+    }
   }
 }
+
 
 variable "subscription_id" {
   type        = string
