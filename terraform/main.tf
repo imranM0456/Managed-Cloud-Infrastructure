@@ -28,8 +28,7 @@ variable "prefix" {
   default = "pedemo"
 }
 
-data "azurerm_client_config" "me" 
-{}
+data "azurerm_client_config" "me" {}
 
 resource "random_string" "sfx" {
   length  = 5

@@ -1,0 +1,61 @@
+name: tf
+on:
+  pull_request:
+  push:
+    branches: [main, "test/**"]
+
+permissions:
+  contents: read            # no id-token at workflow level
+
+concurrency:
+  group: tf-state
+  cancel-in-progress: false
+
+env:
+  ARM_USE_OIDC: "true"
+  ARM_USE_AZUREAD: "true"
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions: { id-token: write, contents: read }
+    env: { ARM_CLIENT_ID: "${{ vars.PLAN_CLIENT_ID }}" }
+    defaults: { run: { working-directory: target } }
+    steps:
+      - uses: actions/checkout@v4          # pin to SHA in real use
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check
+      - run: terraform init -backend-config="storage_account_name=${{ vars.STATE_ACCOUNT }}"
+      - run: terraform validate
+      - run: terraform plan
+
+  deploy-dev:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/test/')
+    runs-on: ubuntu-latest
+    environment: dev
+    permissions: { id-token: write, contents: read }
+    env: { ARM_CLIENT_ID: "${{ vars.APPLY_CLIENT_ID }}" }
+    defaults: { run: { working-directory: target } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend-config="storage_account_name=${{ vars.STATE_ACCOUNT }}"
+      - run: terraform plan -out=tfplan
+      - run: terraform apply tfplan
+
+  deploy-prod:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions: { id-token: write, contents: read }
+    env: { ARM_CLIENT_ID: "${{ vars.APPLY_CLIENT_ID }}" }
+    defaults: { run: { working-directory: target } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend-config="storage_account_name=${{ vars.STATE_ACCOUNT }}"
+      - run: terraform plan -out=tfplan
+      - run: terraform apply tfplan
